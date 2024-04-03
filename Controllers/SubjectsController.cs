@@ -68,7 +68,7 @@ public class SubjectsController : ErrorHandlingController
         // Ensure that the title is unique
         if (!TitleUniquenessValidator<Subject>.IsUnique(_unitOfWork.Subjects, title))
         {
-            return BadRequest();
+            return BadRequest("A subject with the same title already exists in the database.");
         }
 
         var newSubject = new Subject
@@ -85,7 +85,9 @@ public class SubjectsController : ErrorHandlingController
             {
                 _unitOfWork.Save();
             }
-            return Ok(_mapper.Map<SubjectReadDto>(entityEntry.Entity));
+
+            var subject = _unitOfWork.Subjects.Get(s => s.Id == entityEntry.Entity.Id, "Author");
+            return Ok(_mapper.Map<SubjectReadDto>(subject.First()));
         }
         catch
         {
@@ -97,7 +99,7 @@ public class SubjectsController : ErrorHandlingController
 
     [HttpGet("{id}")]
     [Authorize(Policy = nameof(Policy.SubjectPolicyOne))]
-    public IActionResult Get(int id, params string[] join)
+    public IActionResult Get(int id, [FromQuery] string[] join)
     {
         // Always include the owner
         var include = join?.ToHashSet() ?? [];

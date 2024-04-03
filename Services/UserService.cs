@@ -80,7 +80,7 @@ public abstract class UserService
 
         using (var sha512 = SHA512.Create())
         {
-            byte[] combined = CombineByteArray(salt, Convert.FromBase64String(password));
+            byte[] combined = CombineByteArray(salt, Encoding.UTF8.GetBytes(password));
             byte[] hashedBytes = sha512.ComputeHash(combined);
 
             string hashedEnteredPassword = Convert.ToBase64String(hashedBytes);

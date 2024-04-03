@@ -1,6 +1,7 @@
 ﻿using eLearningApi.Enums;
 using eLearningApi.Models;
 using eLearningApi.UserRolesAndPermissions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -16,7 +17,8 @@ public class TokenService
         var claims = new List<Claim>()
         {
             new Claim(ClaimTypes.Name, user.FirstName),
-            new Claim(ClaimTypes.NameIdentifier, user.Email),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Role),
         };
 
@@ -37,9 +39,15 @@ public class TokenService
 
     public static string? GetAuthToken(HttpContext context)
     {
-        if (context.Request.Cookies.TryGetValue("login", out var value))
+        if (context.Request.Headers.TryGetValue("Authorization", out var value))
         {
-            return value;
+            // check prefix
+            string prefix = value.ToString().Split(" ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).FirstOrDefault();
+            if (prefix == JwtBearerDefaults.AuthenticationScheme)
+            {
+                return value.ToString().Split(" ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).LastOrDefault();
+            }
+            return default!;
         }
 
         return default!;

@@ -16,8 +16,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection")));
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection"));
+    options.UseLazyLoadingProxies();
+});
 
+builder.Services.AddSingleton<IAuthorizationService, AuthTest>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<TokenManager>();
 builder.Services.AddScoped<ISubjectRepository, BaseSubjectRepository>();
